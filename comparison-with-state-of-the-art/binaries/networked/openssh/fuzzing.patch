@@ -1,0 +1,161 @@
+diff --git a/servconf.c b/servconf.c
+index 4b434909a..8a30fd474 100644
+--- a/servconf.c
++++ b/servconf.c
+@@ -449,10 +449,11 @@ fill_default_server_options(ServerOptions *options)
+ 		options->unused_connection_timeout = 0;
+ 
+ 	assemble_algorithms(options);
+-
++#if ! defined(FT_FUZZING)
+ 	/* Turn privilege separation and sandboxing on by default */
+ 	if (use_privsep == -1)
+ 		use_privsep = PRIVSEP_ON;
++#endif
+ 
+ #define CLEAR_ON_NONE(v) \
+ 	do { \
+diff --git a/ssh.c b/ssh.c
+index 0019281f4..7478e78d0 100644
+--- a/ssh.c
++++ b/ssh.c
+@@ -681,7 +681,7 @@ main(int ac, char **av)
+ 	size_t n, len;
+ 	u_int j;
+ 	struct ssh_conn_info *cinfo = NULL;
+-
++#if ! defined(FT_FUZZING)
+ 	/* Ensure that fds 0, 1 and 2 are open or directed to /dev/null */
+ 	sanitise_stdfd();
+ 
+@@ -690,7 +690,7 @@ main(int ac, char **av)
+ 	 * with backgrounded ssh processes started by ControlPersist.
+ 	 */
+ 	closefrom(STDERR_FILENO + 1);
+-
++#endif
+ 	__progname = ssh_get_progname(av[0]);
+ 
+ #ifndef HAVE_SETPROCTITLE
+diff --git a/sshconnect2.c b/sshconnect2.c
+index 745c2a051..2344d53b2 100644
+--- a/sshconnect2.c
++++ b/sshconnect2.c
+@@ -224,7 +224,7 @@ ssh_kex2(struct ssh *ssh, char *host, struct sockaddr *hostaddr, u_short port,
+ 	char *all_key, *hkalgs = NULL;
+ 	int r, use_known_hosts_order = 0;
+ 
+-	xxx_host = host;
++	xxx_host = strdup(host);
+ 	xxx_hostaddr = hostaddr;
+ 	xxx_conn_info = cinfo;
+ 
+diff --git a/sshd.c b/sshd.c
+index b4f2b9742..fcb563472 100644
+--- a/sshd.c
++++ b/sshd.c
+@@ -233,7 +233,11 @@ static int *startup_flags = NULL;	/* Indicates child closed listener */
+ static int startup_pipe = -1;		/* in child */
+ 
+ /* variables used for privilege separation */
++#ifdef FT_FUZZING
++int use_privsep = PRIVSEP_OFF;
++#else
+ int use_privsep = -1;
++#endif
+ struct monitor *pmonitor = NULL;
+ int privsep_is_preauth = 1;
+ static int privsep_chroot = 1;
+@@ -1582,10 +1586,10 @@ main(int ac, char **av)
+ 
+ 	if (geteuid() == 0 && setgroups(0, NULL) == -1)
+ 		debug("setgroups(): %.200s", strerror(errno));
+-
++#if ! defined(FT_FUZZING)
+ 	/* Ensure that fds 0, 1 and 2 are open or directed to /dev/null */
+ 	sanitise_stdfd();
+-
++#endif
+ 	/* Initialize configuration options to their default values. */
+ 	initialize_server_options(&options);
+ 
+@@ -1708,10 +1712,12 @@ main(int ac, char **av)
+ 		rexec_flag = 0;
+ 	if (!test_flag && !do_dump_cfg && rexec_flag && !path_absolute(av[0]))
+ 		fatal("sshd re-exec requires execution with an absolute path");
+-	if (rexeced_flag)
++#if !defined(FT_FUZZING)
++    if (rexeced_flag)
+ 		closefrom(REEXEC_MIN_FREE_FD);
+-	else
++    else
+ 		closefrom(REEXEC_DEVCRYPTO_RESERVED_FD);
++#endif
+ 
+ 	seed_rng();
+ 
+diff --git a/sshd_config b/sshd_config
+index 36894ace5..5a80925ae 100644
+--- a/sshd_config
++++ b/sshd_config
+@@ -15,16 +15,16 @@
+ #ListenAddress 0.0.0.0
+ #ListenAddress ::
+ 
+-#HostKey /etc/ssh/ssh_host_rsa_key
+-#HostKey /etc/ssh/ssh_host_ecdsa_key
+-#HostKey /etc/ssh/ssh_host_ed25519_key
++HostKey /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/openssh/keys/ssh_host_rsa_key
++HostKey /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/openssh/keys/ssh_host_ecdsa_key
++HostKey /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/openssh/keys/ssh_host_ed25519_key
+ 
+ # Ciphers and keying
+ #RekeyLimit default none
+ 
+ # Logging
+ #SyslogFacility AUTH
+-#LogLevel INFO
++LogLevel DEBUG3
+ 
+ # Authentication:
+ 
+@@ -61,7 +61,7 @@ AuthorizedKeysFile	.ssh/authorized_keys
+ #KbdInteractiveAuthentication yes
+ 
+ # Kerberos options
+-#KerberosAuthentication no
++KerberosAuthentication yes
+ #KerberosOrLocalPasswd yes
+ #KerberosTicketCleanup yes
+ #KerberosGetAFSToken no
+@@ -81,24 +81,24 @@ AuthorizedKeysFile	.ssh/authorized_keys
+ # and KbdInteractiveAuthentication to 'no'.
+ #UsePAM no
+ 
+-#AllowAgentForwarding yes
+-#AllowTcpForwarding yes
+-#GatewayPorts no
+-#X11Forwarding no
++AllowAgentForwarding yes
++AllowTcpForwarding yes
++GatewayPorts yes
++X11Forwarding yes
+ #X11DisplayOffset 10
+ #X11UseLocalhost yes
+ #PermitTTY yes
+ #PrintMotd yes
+ #PrintLastLog yes
+ #TCPKeepAlive yes
+-#PermitUserEnvironment no
++PermitUserEnvironment yes
+ #Compression delayed
+ #ClientAliveInterval 0
+ #ClientAliveCountMax 3
+ #UseDNS no
+ #PidFile /var/run/sshd.pid
+ #MaxStartups 10:30:100
+-#PermitTunnel no
++PermitTunnel yes
+ #ChrootDirectory none
+ #VersionAddendum none
+ 

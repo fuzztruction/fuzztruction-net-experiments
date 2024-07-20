@@ -1,0 +1,208 @@
+# Folder where results are stored on this machine.
+result-path: "./artifact-results-test"
+
+# Default settings used for all targets defined below. Can be overwritten
+# by a per target basis.
+default-target-settings:
+    # Fuzzers for which the target should be run.
+    fuzzers:
+        - aflnet
+        - ft
+        # - stateafl
+        # - aflpp
+        # - sgfuzz
+        # - stateafl
+    # Duration of each individual run.
+    # This was 24h during the papers evaluation.
+    # A runtime of 12h should be sufficient to observe the same trends as in the paper.
+    run-duration: 5m
+    # Number of times to repeat each experiment for each target.
+    # This was set to 10 for the paper's evaluation.
+    # Depending on the available resources, this should be increased to get statistically more meaningful results.
+    repetitions: 1
+    # Number of cores to allocate per run. This will be capped by the cores
+    # available on the respective machines.
+    # This was 13 for the paper's evaluation.
+    # We observed that this number of cores should be sufficient to replicate the results of the paper on most targets.
+    cores-per-run: 4
+    # The target will only deployed on server with a matching tag.
+    allowed-tags: ["eval"]
+
+targets:
+    # Name of the job
+    - "ngtcp2_client_nginx_server":
+        # The yaml config of the target
+        config: "~/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/nginx/ngtcp2_client_nginx_server.yml"
+        # For these targets, `build.sh <name> deps` is executed.
+        build-target-dependencies:
+            - ngtcp2
+            - nginx
+        # If desired, here it is possible to overwrite some of `default-target-settings`
+        # described at the beginning of this file.
+        default-target-settings:
+            fuzzers:
+                - ft
+                - aflnet
+                # StateAFL is quit unstable because of bugs in the fuzzing runtime itself causing crashes of the fuzzer.
+                # Thus, it is disabled by default since it requires manual work to filter successfull runs from those
+                #- stateafl
+
+
+    - "artifact_dbclient_dropbear_1":
+        # The yaml config of the target
+        config: "~/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/dropbear/dbclient_dropbear.yml"
+        # Targets of which the dependencies must be installed.
+        # I.e., folder names in binaries/networked
+        build-target-dependencies:
+            - dropbear
+        # See default-target-setting for more details
+        target-settings:
+            fuzzers:
+                - ft
+                - aflnet
+                # - stateafl
+
+    - "artifact_openssl_client_server_1":
+        # The yaml config of the target
+        config: "~/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/openssl/openssl_client_server_1.yml"
+        # Targets of which the dependencies must be installed.
+        # I.e., folder names in binaries/networked
+        build-target-dependencies:
+            - openssl
+        # See default-target-setting for more details
+        target-settings:
+          fuzzers:
+              - ft
+              - aflnet
+              - sgfuzz
+
+    - "artifact_libressl_client_server_1":
+        # The yaml config of the target
+        config: "~/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/libressl/libressl_client_server.yml"
+        # Targets of which the dependencies must be installed.
+        # I.e., folder names in binaries/networked
+        build-target-dependencies:
+            - libressl
+        # See default-target-setting for more details
+        target-settings:
+            fuzzers:
+                - ft
+                - aflnet
+                - sgfuzz
+
+    - "artifact_gnutls_client_server_1":
+        # The yaml config of the target
+        config: "~/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/gnutls/gnutls_client_server_1.yml"
+        # Targets of which the dependencies must be installed.
+        # I.e., folder names in binaries/networked
+        build-target-dependencies:
+            - gnutls
+        # See default-target-setting for more details
+        target-settings:
+            fuzzers:
+                - ft
+                - aflnet
+                - sgfuzz
+
+    - "artifact_dcmsend_dcmrecv_1":
+        # The yaml config of the target
+        config: "~/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/dcmtk/dcmsend_dcmrecv_1.yml"
+        # Targets of which the dependencies must be installed.
+        # I.e., folder names in binaries/networked
+        build-target-dependencies:
+            - dcmtk
+        target-settings:
+            fuzzers:
+                - ft
+                - aflnet
+                - sgfuzz
+
+    - "artifact_mosquitto-pub_mosquitto_1_tls":
+        # The yaml config of the target
+        config: "~/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/mosquitto/mosquitto-pub_mosquitto_tls.yml"
+        # Targets of which the dependencies must be installed.
+        # I.e., folder names in binaries/networked
+        build-target-dependencies:
+            - mosquitto
+        target-settings:
+            fuzzers:
+                - ft
+                - aflnet
+                - sgfuzz
+
+    - "artifact_mosquitto-pub_mosquitto_1":
+        # The yaml config of the target
+        config: "~/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/mosquitto/mosquitto-pub_mosquitto.yml"
+        # Targets of which the dependencies must be installed.
+        # I.e., folder names in binaries/networked
+        build-target-dependencies:
+            - mosquitto
+        target-settings:
+            fuzzers:
+                - ft
+                - aflnet
+                - sgfuzz
+
+    - "artifact_smbclient_smbd_1":
+        # The yaml config of the target
+        config: "~/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/samba/smbclient_smbd.yml"
+        # Targets of which the dependencies must be installed.
+        # I.e., folder names in binaries/networked
+        build-target-dependencies:
+            - samba
+        target-settings:
+            fuzzers:
+                - ft
+                # - stateafl
+                - aflnet
+
+    - "artifact_live555_client_server_1":
+        # The yaml config of the target
+        config: "~/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/live555/live555_client_server.yml"
+        # Targets of which the dependencies must be installed.
+        # I.e., folder names in binaries/networked
+        build-target-dependencies:
+            - live555
+        target-settings:
+            fuzzers:
+                - ft
+                # - stateafl
+                - aflnet
+                - sgfuzz
+
+    - "artifact_live555_client_server_auth_1":
+        # The yaml config of the target
+        config: "~/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/live555/live555_client_server_auth.yml"
+        # Targets of which the dependencies must be installed.
+        # I.e., folder names in binaries/networked
+        build-target-dependencies:
+            - live555
+        target-settings:
+            fuzzers:
+                - ft
+                # - stateafl
+                - aflnet
+                - sgfuzz
+
+# Remotes used for evaluation. On all remotes, there must be the fuzztruction-net runtime environment available and checked out
+# at ~/fuzztruction-net.
+remotes:
+    # Remote name.
+    - "blade-33":
+        # The remote address. The address given here must be a valid argument to `ssh` and the access must be possible without password authentication.
+        # So, for example, `ssh local <ssh-address> hostname` should print the remotes hostname without any further interaction.
+        # This setup is also necessary if the remote and the host running the `eval.py` are the same.
+        # To facilitate this, you need to deploy a public key to the remote server and add a new entry to the .ssh/config:
+        # Host <ssh-address>
+        #   Hostname <some-ip>
+        #   IdentityFile ~/.ssh/<key-deployed-on-remote>
+        #   IdentityAgent none
+        #
+        # Make sure the the connection to the remote is working by running the following command which enforces to not use the ssh agent which is not
+        # available when running the `eval.py` script in a tmux session.
+        #   ssh <ssh-address> hostname
+        # Also, make sure that the key is trusted, i.e., added to your known_hosts file.
+        ssh-address: "blade-33"
+        # The number of cores available on the remote server. We advise to set this to the number of physical cores, excluding hyper-threads.
+        cores: 52
+        tags: ["eval"]

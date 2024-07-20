@@ -1,0 +1,70 @@
+diff --git a/devel/openssl b/devel/openssl
+--- a/devel/openssl
++++ b/devel/openssl
+@@ -1 +1 @@
+-Subproject commit 8e813c085ac43ca6a58a20f7982b26ed31dc326a
++Subproject commit 8e813c085ac43ca6a58a20f7982b26ed31dc326a-dirty
+diff --git a/lib/random.c b/lib/random.c
+index 080535a4a..9e428a8ce 100644
+--- a/lib/random.c
++++ b/lib/random.c
+@@ -169,6 +169,11 @@ int gnutls_rnd(gnutls_rnd_level_t level, void *data, size_t len)
+ 	int ret;
+ 	FAIL_IF_LIB_ERROR;
+ 
++#ifdef FT_FUZZING
++	memset(data, 0xcc, len);
++	return 0;
++#endif
++
+ 	ret = _gnutls_rnd_init();
+ 	if (unlikely(ret < 0))
+ 		return gnutls_assert_val(ret);
+@@ -193,6 +198,9 @@ int gnutls_rnd(gnutls_rnd_level_t level, void *data, size_t len)
+  **/
+ void gnutls_rnd_refresh(void)
+ {
++#ifdef FT_FUZZING
++	return;
++#endif
+ 	if (rnd_initialized && _gnutls_rnd_ops.rnd_refresh)
+ 		_gnutls_rnd_ops.rnd_refresh(gl_tls_get(ctx_key));
+ }
+diff --git a/src/serv.c b/src/serv.c
+index c5f807d03..fac3d2635 100644
+--- a/src/serv.c
++++ b/src/serv.c
+@@ -53,6 +53,10 @@
+ #include "xalloc.h"
+ #include "xsize.h"
+ 
++#ifdef FT_FUZZING
++#undef HAVE_IPV6
++#endif
++
+ /* konqueror cannot handle sending the page in multiple
+  * pieces.
+  */
+@@ -185,6 +189,9 @@ static void listener_free(const void *elt)
+ 		shutdown(j->fd, 2);
+ 		close(j->fd);
+ 		gnutls_deinit(j->tls_session);
++#if defined(FT_FUZZING) && !defined(SGFUZZ)
++		exit(1);
++#endif
+ 	}
+ }
+ 
+@@ -1164,7 +1171,11 @@ static void tls_audit_log_func(gnutls_session_t session, const char *str)
+ 	fprintf(stderr, "|<%p>| %s", session, str);
+ }
+ 
+-int main(int argc, char **argv)
++#ifdef SGFUZZ
++int HonggfuzzNetDriver_main(int argc, char ** argv)
++#else
++int main(int argc, char ** argv)
++#endif
+ {
+ 	int ret, mtu, port, timeout;
+ 	char name[256];

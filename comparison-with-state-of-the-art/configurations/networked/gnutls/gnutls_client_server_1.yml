@@ -1,0 +1,91 @@
+work-directory: "/tmp/gnutls-client-server-1"
+input-directory: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/no-inputs"
+jail-uid: 606400022
+jail-gid: 606400022
+
+
+source:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/gnutls/generator/src/.libs/gnutls-cli"
+    env:
+        - LD_LIBRARY_PATH: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/gnutls/generator/lib/.libs/"
+
+    arguments:
+        - "127.0.0.1:5555"
+        - "--insecure"
+        - "--rehandshake"
+        - "--verify-allow-broken"
+        - "--starttls"
+        - "-d"
+        - "9999"
+        - "-b"
+    input-type: Tcp
+    output-type: Tcp
+    is-server: false
+    log-stdout: false
+    log-stderr: false
+
+sink:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/gnutls/consumer/src/.libs/gnutls-serv"
+    env:
+        - LD_LIBRARY_PATH: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/gnutls/consumer/lib/.libs/"
+    arguments:
+        - "-a"
+        - "-d"
+        - "1000"
+        - "--earlydata"
+        - "--x509certfile=/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/gnutls/server/cert.pem"
+        - "--x509keyfile=/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/gnutls/server/key.pem"
+        - "-b"
+        - "-p"
+        - "5555"
+    input-type: Tcp
+    output-type: Tcp
+    is-server: true
+    server-port: "5555"
+    log-stdout: false
+    log-stderr: true
+    allow-unstable-sink: true
+
+sink-cov:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/gnutls/consumer_llvm_cov/src/gnutls-serv"
+    # env:
+    #     - LD_LIBRARY_PATH: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/gnutls/consumer_llvm_cov/lib/.libs/"
+
+afl-net:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/gnutls/consumer_afl_net/src/.libs/gnutls-serv"
+    env:
+        - LD_LIBRARY_PATH: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/gnutls/consumer_afl_net/lib/.libs/"
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/gnutls/seeds/raw"
+    protocol: "TLS"
+    netinfo: tcp://127.0.0.1/5555
+
+state-afl:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/gnutls/consumer_stateafl/src/.libs/gnutls-serv"
+    env:
+        - LD_LIBRARY_PATH: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/gnutls/consumer_stateafl/src/.libs"
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/gnutls/seeds/replayable"
+    protocol: "TLS"
+    netinfo: tcp://127.0.0.1/5555
+    enable-state-aware-mode: false
+
+sgfuzz:
+    bin-path: /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/gnutls/consumer_sgfuzz/src/.libs/gnutls-serv
+    env:
+        - LD_LIBRARY_PATH: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/gnutls/consumer_sgfuzz/lib/.libs/"
+    arguments:
+        - "-a"
+        - "-d"
+        - "1000"
+        - "--earlydata"
+        - "--x509certfile=/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/gnutls/server/cert.pem"
+        - "--x509keyfile=/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/gnutls/server/key.pem"
+        - "-b"
+        - "-p"
+        - "5555"
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/gnutls/seeds/replayable"
+    netinfo: tcp://127.0.0.1/5555
+
+
+
+vanilla:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/gnutls/generator/src/.libs/gnutls-cli"

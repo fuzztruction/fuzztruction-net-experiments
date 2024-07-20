@@ -1,0 +1,36 @@
+work-directory: "/tmp/dropbear-dbclient"
+input-directory: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/no-inputs"
+jail-uid: 606400022
+jail-gid: 606400022
+
+# phases:
+#     discovery:
+#         enabled: true
+#         terminate-when-finished: true
+#         batch-size: 20
+
+source:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dropbear/generator/dropbear"
+    arguments: ["-p", "127.0.0.1:2255", "-a", "-F", "-r", "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/dropbear/keys/ed25519", "-E", "-B"]
+    input-type: Tcp
+    output-type: Tcp
+    is-server: true
+    server-port: "2255"
+    log-stdout: false
+    log-stderr: false
+
+sink:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dropbear/consumer/dbclient"
+    arguments: ["user@127.0.0.1/2255", "-yy", "-i", "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/dropbear/keys/ed25519", "pwd"]
+    input-type: Tcp
+    output-type: Tcp
+    is-server: false
+    log-stdout: false
+    log-stderr: false
+    allow-unstable-sink: true
+
+sink-cov:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dropbear/consumer_llvm_cov/dbclient"
+
+vanilla:
+    bin-path: "/usr/bin/true"

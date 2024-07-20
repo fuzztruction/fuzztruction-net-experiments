@@ -1,0 +1,51 @@
+work-directory: "/tmp/live555-client-server-auth"
+input-directory: /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/no-inputs
+jail-uid: 606400022
+jail-gid: 606400022
+
+#  Parse the URL as "rtsp://[<username>[:<password>]@]<server-address-or-name>[:<port>][/<stream-name>]" (or "rtsps://...")
+source:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555_auth/generator/testProgs/testRTSPClient"
+    arguments: ["rtsp://user:password@127.0.0.1:8554/mp3AudioTest"]
+    input-type: Tcp
+    output-type: Tcp
+    is-server: false
+    log-stdout: true
+    log-stderr: true
+
+sink:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555_auth/consumer/testProgs/testOnDemandRTSPServer"
+    arguments: ["8554"]
+    input-type: Tcp
+    output-type: Tcp
+    is-server: true
+    server-port: "8554"
+    log-stdout: true
+    log-stderr: true
+    allow-unstable-sink: true
+    send-sigterm: true
+
+sink-cov:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555_auth/consumer_llvm_cov/testProgs/testOnDemandRTSPServer"
+
+afl-net:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555_auth/consumer_afl_net/testProgs/testOnDemandRTSPServer"
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/live555/seeds_auth/raw"
+    protocol: "RTSP"
+    netinfo: tcp://127.0.0.1/8554
+    send-sigterm: true
+
+state-afl:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555_auth/consumer_stateafl/testProgs/testOnDemandRTSPServer"
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/live555/seeds_auth/replayable"
+    protocol: "RTSP"
+    netinfo: tcp://127.0.0.1/8554
+    send-sigterm: true
+
+sgfuzz:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555_auth/consumer_sgfuzz/testProgs/testOnDemandRTSPServer"
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/live555/seeds_auth/raw"
+    netinfo: tcp://127.0.0.1/8554
+
+vanilla:
+    bin-path: "/usr/bin/true"

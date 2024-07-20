@@ -1,0 +1,67 @@
+work-directory: "/tmp/ngtcp2_client_server-1"
+input-directory: /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/no-inputs
+jail-uid: 606400022
+jail-gid: 606400022
+
+
+source:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/ngtcp2/generator/build/examples/wsslclient"
+    arguments:
+      - "--exit-on-all-streams-close"
+      - "127.0.0.1"
+      - "7899"
+    input-type: udp
+    output-type: udp
+    is-server: false
+    log-stdout: true
+    log-stderr: true
+
+sink:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/ngtcp2/consumer/build/examples/wsslserver"
+    arguments:
+      - "127.0.0.1"
+      - "7899"
+      - "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/ngtcp2/server.key"
+      - "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/ngtcp2/server.cert"
+    input-type: udp
+    output-type: udp
+    is-server: true
+    server-port: "7899"
+    server-ready-on: "Bind(0)"
+    send-sigterm: true
+    log-stdout: true
+    log-stderr: true
+    allow-unstable-sink: true
+
+sink-cov:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/ngtcp2/consumer_llvm_cov/build/examples/wsslserver"
+    env:
+      # god knows why
+      - LD_PRELOAD: /lib/x86_64-linux-gnu/libstdc++.so.6
+
+afl-net:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/ngtcp2/consumer_afl_net/build/examples/wsslserver"
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/ngtcp2/seeds/raw"
+    protocol: "NOP"
+    netinfo: udp://127.0.0.1/7899
+    send-sigterm: true
+    # fuzzer fails to start with this being true (default)
+    enable-state-aware-mode: false
+
+# fails to compile
+state-afl:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/ngtcp2/consumer_stateafl/build/bin/Release/quicsample"
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/ngtcp2/seeds/replayable"
+    protocol: "NOP"
+    netinfo: udp://127.0.0.1/4567
+    send-sigterm: true
+    # fuzzer fails to start with this being true (default)
+    enable-state-aware-mode: false
+
+sgfuzz:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/ngtcp2/consumer_sgfuzz/build/bin/Release/quicsample"
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/ngtcp2/seeds/raw"
+    netinfo: udp://127.0.0.1/4567
+
+vanilla:
+    bin-path: "/usr/bin/true"

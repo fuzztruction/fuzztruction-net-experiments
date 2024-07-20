@@ -1,0 +1,76 @@
+work-directory: "/tmp/dcmsend-dcmrecv-1"
+input-directory: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/no-inputs"
+jail-uid: 606400022
+jail-gid: 606400022
+
+
+source:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dcmtk/generator/bin/dcmsend"
+    env:
+        - DCMDICTPATH: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dcmtk/src/dcmdata/data/dicom.dic"
+    arguments:
+        - "-aet"
+        - "YOU_AET"
+        - "-aec"
+        - "DCM4CHEE"
+        - "-d"
+        - "127.0.0.1"
+        - "6789"
+        - /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/dcmtk/dcm_files/image-00000.dcm
+    input-type: Tcp
+    output-type: Tcp
+    is-server: false
+    log-stdout: false
+    log-stderr: false
+
+sink:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dcmtk/consumer/bin/dcmrecv"
+    env:
+        - DCMDICTPATH: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dcmtk/src/dcmdata/data/dicom.dic"
+    arguments:
+        - "--config-file"
+        - "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dcmtk/src/dcmnet/etc/storescp.cfg"
+        - "Default"
+        - "-d"
+        - "6789"
+    input-type: Tcp
+    output-type: Tcp
+    is-server: true
+    server-port: "6789"
+    log-stdout: false
+    log-stderr: true
+    allow-unstable-sink: true
+
+sink-cov:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dcmtk/consumer_llvm_cov/bin/dcmrecv"
+    env:
+        - DCMDICTPATH: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dcmtk/src/dcmdata/data/dicom.dic"
+
+afl-net:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dcmtk/consumer_afl_net/bin/dcmrecv"
+    env:
+        - DCMDICTPATH: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dcmtk/src/dcmdata/data/dicom.dic"
+    # TCP stream recording of the data exchange between source and sink when executed as specified above.
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/dcmtk/seeds/raw"
+    protocol: "DICOM"
+    netinfo: tcp://127.0.0.1/6789
+
+state-afl:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dcmtk/consumer_stateafl/bin/dcmrecv"
+    env:
+        - DCMDICTPATH: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dcmtk/src/dcmdata/data/dicom.dic"
+    # TCP stream recording of the data exchange between source and sink when executed as specified above.
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/dcmtk/seeds/replayable"
+    protocol: "DICOM"
+    netinfo: tcp://127.0.0.1/6789
+
+sgfuzz:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dcmtk/consumer_sgfuzz/build/bin/dcmrecv"
+    env:
+        - DCMDICTPATH: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dcmtk/src/dcmdata/data/dicom.dic"
+    # TCP stream recording of the data exchange between source and sink when executed as specified above.
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/dcmtk/seeds/raw"
+    netinfo: tcp://127.0.0.1/6789
+
+vanilla:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/gnutls/generator/src/.libs/gnutls-cli"

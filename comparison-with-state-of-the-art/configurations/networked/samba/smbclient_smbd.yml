@@ -1,0 +1,58 @@
+work-directory: "/tmp/smbclient-smbd-1"
+input-directory: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/no-inputs"
+jail-uid: 606400022
+jail-gid: 606400022
+
+
+source:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/samba/generator/bin/default/source3/client/smbclient"
+    arguments:
+      - "-p"
+      - "7777"
+      - "-L"
+      - "//127.0.0.1"
+    input-type: Tcp
+    output-type: Tcp
+    is-server: false
+    log-stdout: false
+    log-stderr: false
+
+sink:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/samba/consumer/bin/default/source3/smbd/smbd"
+    env:
+      - AFL_IGNORE_PROBLEMS: "1"
+    arguments:
+      - "-s"
+      - "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/samba/smb.conf"
+      - "-F"
+      - "-i"
+    input-type: Tcp
+    output-type: Tcp
+    is-server: true
+    server-port: "7777"
+    server-ready-on: "Listen"
+    log-stdout: false
+    log-stderr: true
+    allow-unstable-sink: true
+
+sink-cov:
+    env:
+      - AFL_IGNORE_PROBLEMS: "1"
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/samba/consumer_llvm_cov/bin/default/source3/smbd/smbd"
+
+afl-net:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/samba/consumer_afl_net/bin/default/source3/smbd/smbd"
+    # TCP stream recording of the data exchange between source and sink when executed as specified above.
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/samba/seeds/raw"
+    protocol: "NOP"
+    netinfo: tcp://127.0.0.1/7777
+
+state-afl:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/samba/consumer_stateafl/bin/default/source3/smbd/smbd"
+    # TCP stream recording of the data exchange between source and sink when executed as specified above.
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/samba/seeds/replayable"
+    protocol: "xxx"
+    netinfo: tcp://127.0.0.1/7777
+
+vanilla:
+    bin-path: "/usr/bin/true"

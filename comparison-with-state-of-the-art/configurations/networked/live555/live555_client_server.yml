@@ -1,0 +1,50 @@
+work-directory: "/tmp/live555-client-server"
+input-directory: /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/no-inputs
+jail-uid: 606400022
+jail-gid: 606400022
+
+
+source:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555/generator/testProgs/testRTSPClient"
+    arguments: ["rtsp://127.0.0.1:8554/mp3AudioTest"]
+    input-type: Tcp
+    output-type: Tcp
+    is-server: false
+    log-stdout: true
+    log-stderr: true
+
+sink:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555/consumer/testProgs/testOnDemandRTSPServer"
+    arguments: ["8554"]
+    input-type: Tcp
+    output-type: Tcp
+    is-server: true
+    server-port: "8554"
+    log-stdout: true
+    log-stderr: true
+    allow-unstable-sink: true
+
+sink-cov:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555/consumer_llvm_cov/testProgs/testOnDemandRTSPServer"
+
+afl-net:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555/consumer_afl_net/testProgs/testOnDemandRTSPServer"
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/live555/seeds/raw"
+    protocol: "RTSP"
+    netinfo: tcp://127.0.0.1/8554
+    send-sigterm: true
+
+state-afl:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555/consumer_stateafl/testProgs/testOnDemandRTSPServer"
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/live555/seeds/replayable"
+    protocol: "RTSP"
+    netinfo: tcp://127.0.0.1/8554
+    send-sigterm: true
+
+sgfuzz:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555/consumer_sgfuzz/testProgs/testOnDemandRTSPServer"
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/live555/seeds/raw"
+    netinfo: tcp://127.0.0.1/8554
+
+vanilla:
+    bin-path: "/usr/bin/true"

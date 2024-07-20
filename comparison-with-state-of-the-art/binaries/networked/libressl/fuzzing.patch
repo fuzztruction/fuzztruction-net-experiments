@@ -1,0 +1,52 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ca593f2..214fdea 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -243,15 +243,15 @@ if(HAVE_TIMEGM)
+ 	add_definitions(-DHAVE_TIMEGM)
+ endif()
+ 
+-check_function_exists(arc4random_buf HAVE_ARC4RANDOM_BUF)
+-if(HAVE_ARC4RANDOM_BUF)
+-	add_definitions(-DHAVE_ARC4RANDOM_BUF)
+-endif()
++# check_function_exists(arc4random_buf HAVE_ARC4RANDOM_BUF)
++# if(HAVE_ARC4RANDOM_BUF)
++# 	add_definitions(-DHAVE_ARC4RANDOM_BUF)
++# endif()
+ 
+-check_function_exists(arc4random_uniform HAVE_ARC4RANDOM_UNIFORM)
+-if(HAVE_ARC4RANDOM_UNIFORM)
+-	add_definitions(-DHAVE_ARC4RANDOM_UNIFORM)
+-endif()
++# check_function_exists(arc4random_uniform HAVE_ARC4RANDOM_UNIFORM)
++# if(HAVE_ARC4RANDOM_UNIFORM)
++# 	add_definitions(-DHAVE_ARC4RANDOM_UNIFORM)
++# endif()
+ 
+ check_function_exists(explicit_bzero HAVE_EXPLICIT_BZERO)
+ if(HAVE_EXPLICIT_BZERO)
+@@ -263,10 +263,10 @@ if(HAVE_GETAUXVAL)
+ 	add_definitions(-DHAVE_GETAUXVAL)
+ endif()
+ 
+-check_function_exists(getentropy HAVE_GETENTROPY)
+-if(HAVE_GETENTROPY)
+-	add_definitions(-DHAVE_GETENTROPY)
+-endif()
++# check_function_exists(getentropy HAVE_GETENTROPY)
++# if(HAVE_GETENTROPY)
++# 	add_definitions(-DHAVE_GETENTROPY)
++# endif()
+ 
+ check_symbol_exists(getpagesize unistd.h HAVE_GETPAGESIZE)
+ if(HAVE_GETPAGESIZE)
+diff --git a/crypto/CMakeLists.txt b/crypto/CMakeLists.txt
+index 6ff46c8..dd793c6 100644
+--- a/crypto/CMakeLists.txt
++++ b/crypto/CMakeLists.txt
+@@ -1034,4 +1034,3 @@ if(BUILD_SHARED_LIBS)
+ 	add_library(crypto-static STATIC $<TARGET_OBJECTS:crypto_obj>)
+ 	target_link_libraries(crypto-static ${PLATFORM_LIBS})
+ endif()
+-

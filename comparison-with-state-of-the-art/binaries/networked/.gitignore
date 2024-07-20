@@ -1,0 +1,8 @@
+*/consumer/
+*/consumer_afl_net/
+*/consumer_llvm_cov/
+*/consumer_sgfuzz/
+*/consumer_stateafl/
+*/generator/
+*/src
+live555_auth/src-sgfuzz/

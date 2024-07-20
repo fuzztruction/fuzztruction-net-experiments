@@ -1,0 +1,74 @@
+work-directory: "/tmp/mosquitto-pub_mosquitto-1"
+input-directory: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/no-inputs"
+jail-uid: 606400022
+jail-gid: 606400022
+
+source:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/mosquitto/generator/build/client/mosquitto_pub"
+    arguments:
+      - "-h"
+      - "127.0.0.1"
+      - "-p"
+      - "7899"
+      - "-t"
+      - "TOPIC"
+      - "-m"
+      - "MyMESSAGE"
+      - "--will-topic"
+      - "the-will-topic"
+      - "--will-retain"
+      - "--will-payload"
+      - "will-payload"
+      - "--insecure"
+      - "--will-qos"
+      - "1"
+      - "--repeat"
+      - "10"
+      - "-r"
+    input-type: Tcp
+    output-type: Tcp
+    is-server: false
+    log-stdout: false
+    log-stderr: false
+
+sink:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/mosquitto/consumer/build/src/mosquitto"
+    arguments:
+      - "-p"
+      - "7899"
+    input-type: Tcp
+    output-type: Tcp
+    is-server: true
+    server-port: "7899"
+    server-ready-on: "Listen"
+    log-stdout: false
+    log-stderr: true
+    allow-unstable-sink: true
+
+
+
+sink-cov:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/mosquitto/consumer_llvm_cov/build/src/mosquitto"
+
+afl-net:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/mosquitto/consumer_afl_net/build/src/mosquitto"
+    # TCP stream recording of the data exchange between source and sink when executed as specified above.
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/mosquitto/seeds/raw/normal"
+    protocol: "NOP"
+    netinfo: tcp://127.0.0.1/7899
+
+state-afl:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/mosquitto/consumer_stateafl/build/src/mosquitto"
+    # TCP stream recording of the data exchange between source and sink when executed as specified above.
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/mosquitto/seeds/replayable/normal"
+    protocol: "xxx"
+    netinfo: tcp://127.0.0.1/7899
+
+sgfuzz:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/mosquitto/consumer_sgfuzz/build/src/mosquitto"
+    # TCP stream recording of the data exchange between source and sink when executed as specified above.
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/mosquitto/seeds/raw/normal"
+    netinfo: tcp://127.0.0.1/7899
+
+vanilla:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/gnutls/generator/src/.libs/gnutls-cli"

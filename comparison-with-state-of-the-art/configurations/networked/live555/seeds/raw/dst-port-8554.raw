@@ -1,0 +1,21 @@
+DESCRIBE rtsp://127.0.0.1:8554/mp3AudioTest RTSP/1.0
+CSeq: 2
+User-Agent: /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555/generator/testProgs/testRTSPClient (LIVE555 Streaming Media v2023.06.14)
+Accept: application/sdp
+
+SETUP rtsp://127.0.0.1:8554/mp3AudioTest/track1 RTSP/1.0
+CSeq: 3
+User-Agent: /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555/generator/testProgs/testRTSPClient (LIVE555 Streaming Media v2023.06.14)
+Transport: RTP/AVP;unicast;client_port=60176-60177
+
+PLAY rtsp://127.0.0.1:8554/mp3AudioTest/ RTSP/1.0
+CSeq: 4
+User-Agent: /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555/generator/testProgs/testRTSPClient (LIVE555 Streaming Media v2023.06.14)
+Session: D533D883
+Range: npt=0.000-
+
+TEARDOWN rtsp://127.0.0.1:8554/mp3AudioTest/ RTSP/1.0
+CSeq: 5
+User-Agent: /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555/generator/testProgs/testRTSPClient (LIVE555 Streaming Media v2023.06.14)
+Session: D533D883
+

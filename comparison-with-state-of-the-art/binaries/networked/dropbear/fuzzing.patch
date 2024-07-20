@@ -1,0 +1,161 @@
+diff --git a/src/dbrandom.c b/src/dbrandom.c
+index 41aaa48..b61ff8d 100644
+--- a/src/dbrandom.c
++++ b/src/dbrandom.c
+@@ -53,6 +53,9 @@ static int donerandinit = 0;
+ static int
+ process_file(hash_state *hs, const char *filename,
+ 		unsigned int wantlen, int prngd) {
++#ifdef FT_FUZZING
++	return DROPBEAR_SUCCESS;
++#endif
+ 	int readfd = -1;
+ 	unsigned int readcount;
+ 	int ret = DROPBEAR_FAILURE;
+@@ -111,6 +114,9 @@ out:
+ 
+ void addrandom(const unsigned char * buf, unsigned int len)
+ {
++#ifdef FT_FUZZING
++	return;
++#endif
+ 	hash_state hs;
+ 
+ #if DROPBEAR_FUZZ
+@@ -131,6 +137,9 @@ void addrandom(const unsigned char * buf, unsigned int len)
+ 
+ static void write_urandom()
+ {
++#ifdef FT_FUZZING
++	return;
++#endif
+ #if DROPBEAR_FUZZ
+ 	if (fuzz.fuzzing) {
+ 		return;
+@@ -167,6 +176,9 @@ void fuzz_seed(const unsigned char* dat, unsigned int len) {
+  * May block if the kernel isn't ready.
+  * Return DROPBEAR_SUCCESS or DROPBEAR_FAILURE */
+ static int process_getrandom(hash_state *hs) {
++#ifdef FT_FUZZING
++	return DROPBEAR_SUCCESS;
++#endif
+ 	char buf[INIT_SEED_SIZE];
+ 	ssize_t ret;
+ 
+@@ -221,6 +233,9 @@ static int process_getrandom(hash_state *hs) {
+ /* Initialise the prng from /dev/urandom or prngd. This function can
+  * be called multiple times */
+ void seedrandom() {
++#ifdef FT_FUZZING
++	return;
++#endif
+ 	hash_state hs;
+ 
+ 	pid_t pid;
+@@ -312,8 +327,16 @@ void seedrandom() {
+ 	write_urandom();
+ }
+ 
++#ifdef FT_FUZZING
++static char  next_rand_char = 0x00;
++#endif
++
+ /* return len bytes of pseudo-random data */
+ void genrandom(unsigned char* buf, unsigned int len) {
++#ifdef FT_FUZZING
++	memset(buf, next_rand_char++, len);
++	return;
++#endif
+ 
+ 	hash_state hs;
+ 	unsigned char hash[SHA256_HASH_SIZE];
+diff --git a/src/dbutil.h b/src/dbutil.h
+index df2f89b..39b847e 100644
+--- a/src/dbutil.h
++++ b/src/dbutil.h
+@@ -80,7 +80,11 @@ int m_snprintf(char *str, size_t size, const char *format, ...);
+ #define DEF_MP_INT(X) mp_int X = {0, 0, 0, NULL}
+ 
+ /* Dropbear assertion */
++#ifdef FT_GENERATOR
++#define dropbear_assert(X)
++#else
+ #define dropbear_assert(X) do { if (!(X)) { fail_assert(#X, __FILE__, __LINE__); } } while (0)
++#endif
+ 
+ /* Returns 0 if a and b have the same contents */
+ int constant_time_memcmp(const void* a, const void *b, size_t n);
+diff --git a/src/debug.h b/src/debug.h
+index ab32fbd..95190e8 100644
+--- a/src/debug.h
++++ b/src/debug.h
+@@ -97,6 +97,6 @@ extern int debug_trace;
+  * here. You can then log in as any user with this password. Ensure that you
+  * make your own password, and are careful about using this. This will also
+  * disable some of the chown pty code etc*/
+-/* #define DEBUG_HACKCRYPT "hL8nrFDt0aJ3E" */ /* this is crypt("password") */
++#define DEBUG_HACKCRYPT "hL8nrFDt0aJ3E" /* this is crypt("password") */
+ 
+ #endif
+diff --git a/src/svr-main.c b/src/svr-main.c
+index 86d0db2..5c1390f 100644
+--- a/src/svr-main.c
++++ b/src/svr-main.c
+@@ -43,7 +43,13 @@ static void commonsetup(void);
+ #if defined(DBMULTI_dropbear) && DROPBEAR_MULTI
+ int dropbear_main(int argc, char ** argv, const char* multipath)
+ #else
++
++#ifdef SGFUZZ
++int HonggfuzzNetDriver_main(int argc, char ** argv)
++#else
+ int main(int argc, char ** argv)
++#endif
++
+ #endif
+ {
+ #if !DROPBEAR_MULTI
+@@ -461,9 +467,11 @@ static void commonsetup() {
+ 	if (sigaction(SIGCHLD, &sa_chld, NULL) < 0) {
+ 		dropbear_exit("signal() error");
+ 	}
++#ifndef FT_FUZZING
+ 	if (signal(SIGSEGV, sigsegv_handler) == SIG_ERR) {
+ 		dropbear_exit("signal() error");
+ 	}
++#endif
+ 
+ 	crypto_init();
+ 
+diff --git a/src/sysoptions.h b/src/sysoptions.h
+index 82249f5..4de81bb 100644
+--- a/src/sysoptions.h
++++ b/src/sysoptions.h
+@@ -37,13 +37,23 @@
+ 	#error "NON_INETD_MODE or INETD_MODE (or both) must be enabled."
+ #endif
+ 
+-/* Would probably work on freebsd but hasn't been tested */
+-#if defined(HAVE_FEXECVE) && DROPBEAR_REEXEC && defined(__linux__)
+-#define DROPBEAR_DO_REEXEC 1
++
++#if defined(FT_FUZZING) & !defined(SGFUZZ)
++	#define DEBUG_NOFORK 1
++	#define DROPBEAR_DO_REEXEC 0
++#elif defined(SGFUZZ)
++	#define DEBUG_NOFORK 1
++	#define DROPBEAR_DO_REEXEC 1
+ #else
+-#define DROPBEAR_DO_REEXEC 0
++	/* Would probably work on freebsd but hasn't been tested */
++	#if defined(HAVE_FEXECVE) && DROPBEAR_REEXEC && defined(__linux__)
++	#define DROPBEAR_DO_REEXEC 1
++	#else
++	#define DROPBEAR_DO_REEXEC 0
++	#endif
+ #endif
+ 
++
+ /* A client should try and send an initial key exchange packet guessing
+  * the algorithm that will match - saves a round trip connecting, has little
+  * overhead if the guess was "wrong". */

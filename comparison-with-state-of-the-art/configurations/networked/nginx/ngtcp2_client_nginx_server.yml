@@ -1,0 +1,62 @@
+work-directory: "/tmp/ngtcp2_client_nginx_server-1"
+input-directory: /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/no-inputs
+jail-uid: 606400022
+jail-gid: 606400022
+
+
+source:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/ngtcp2/generator/build/examples/wsslclient"
+    arguments:
+      - "--exit-on-all-streams-close"
+      - "127.0.0.1"
+      - "9999"
+    input-type: udp
+    output-type: udp
+    is-server: false
+    log-stdout: true
+    log-stderr: true
+
+sink:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/nginx/consumer/objs/nginx"
+    arguments:
+      - "-c"
+      - "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/nginx/src/conf/nginx.conf"
+    input-type: udp
+    output-type: udp
+    is-server: true
+    server-port: "9999"
+    server-ready-on: "Bind(0)"
+    send-sigterm: true
+    log-stdout: true
+    log-stderr: true
+    allow-unstable-sink: true
+
+sink-cov:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/nginx/consumer_llvm_cov/objs/nginx"
+
+afl-net:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/nginx/consumer_afl_net/objs/nginx"
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/ngtcp2/seeds/raw"
+    protocol: "NOP"
+    netinfo: udp://127.0.0.1/9999
+    send-sigterm: true
+    # fuzzer fails to start with this being true (default)
+    enable-state-aware-mode: false
+
+state-afl:
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/nginx/consumer_stateafl/objs/nginx"
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/ngtcp2/seeds/replayable"
+    protocol: "NOP"
+    netinfo: udp://127.0.0.1/9999
+    send-sigterm: true
+    # fuzzer fails to start with this being true (default)
+    enable-state-aware-mode: false
+
+# UDP is not supported by sgfuzz
+# sgfuzz:
+#     bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/ngtcp2/consumer_sgfuzz/build/bin/Release/quicsample"
+#     input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/ngtcp2/seeds/raw"
+#     netinfo: udp://127.0.0.1/4567
+
+vanilla:
+    bin-path: "/usr/bin/true"

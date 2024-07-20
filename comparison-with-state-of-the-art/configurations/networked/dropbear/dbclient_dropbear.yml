@@ -1,0 +1,65 @@
+# Directory in that all files that belong to the fuzzing campaign are stored.
+work-directory: "/tmp/dclient-dropbear-1"
+# Not used for Fuzztruction-Net.
+input-directory: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/no-inputs"
+# UID/GID the weird peer's privileges are dropped to.
+jail-uid: 606400022
+jail-gid: 606400022
+
+# The program that is acting as the weird peer.
+source:
+    # The binary that has to be instrumented with our custom compiler.
+    # See comparison-with-state-of-the-art/binaries/networked/dropbear/config.sh for how the binary has been build.
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dropbear/generator/dbclient"
+    arguments: ["user@127.0.0.1/2255", "-yy", "-i", "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/dropbear/keys/ed25519", "pwd"]
+    input-type: Tcp
+    output-type: Tcp
+    is-server: false
+    log-stdout: false
+    log-stderr: false
+
+# The program that is actually fuzzed.
+sink:
+    # The target binary that has to be compiled with our custom AFL++ version.
+    # See comparison-with-state-of-the-art/binaries/networked/dropbear/config.sh for how the binary has been build.
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dropbear/consumer/dropbear"
+    arguments: ["-p", "127.0.0.1:2255", "-a", "-F", "-r", "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/dropbear/keys/ed25519", "-E", "-B"]
+    input-type: Tcp
+    output-type: Tcp
+    is-server: true
+    server-port: "2255"
+    log-stdout: false
+    log-stderr: false
+    allow-unstable-sink: true
+
+# Binary used for coverage computation.
+sink-cov:
+    # See comparison-with-state-of-the-art/binaries/networked/dropbear/config.sh for how the binary has been build.
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dropbear/consumer_llvm_cov/dropbear"
+
+# Binary used for fuzzing using AFLNet
+afl-net:
+    # See comparison-with-state-of-the-art/binaries/networked/dropbear/config.sh for how the binary has been build.
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dropbear/consumer_afl_net/dropbear"
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/dropbear/seeds/raw"
+    protocol: "SSH"
+    netinfo: tcp://127.0.0.1/2255
+
+# Binary used for fuzzing using StateAFL
+state-afl:
+    # See comparison-with-state-of-the-art/binaries/networked/dropbear/config.sh for how the binary has been build.
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dropbear/consumer_stateafl/dropbear"
+    input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/dropbear/seeds/replayable"
+    protocol: "SSH"
+    netinfo: tcp://127.0.0.1/2255
+
+# Binary used for fuzzing using SGFuzz
+# Does not work because of target using exec
+# sgfuzz:
+#     bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/dropbear/consumer_sgfuzz/dropbear"
+#     input-dir: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/dropbear/seeds/raw"
+#     netinfo: tcp://127.0.0.1/2255
+
+# Unused.
+vanilla:
+    bin-path: "/usr/bin/true"

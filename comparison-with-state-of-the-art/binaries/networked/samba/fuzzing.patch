@@ -1,0 +1,73 @@
+diff --git a/buildtools/wafsamba/samba_bundled.py b/buildtools/wafsamba/samba_bundled.py
+index 2300565b2e4..7e95b135eed 100644
+--- a/buildtools/wafsamba/samba_bundled.py
++++ b/buildtools/wafsamba/samba_bundled.py
+@@ -266,5 +266,3 @@ def NONSHARED_BINARY(bld, name):
+     '''return True if a binary should be built without non-system shared libs'''
+     return target_in_list(name, bld.env.NONSHARED_BINARIES, False)
+ Build.BuildContext.NONSHARED_BINARY = NONSHARED_BINARY
+-
+-
+diff --git a/ctdb/common/run_event.c b/ctdb/common/run_event.c
+index d283664e2cf..8abd82a920e 100644
+--- a/ctdb/common/run_event.c
++++ b/ctdb/common/run_event.c
+@@ -486,7 +486,11 @@ static void run_debug_done(struct tevent_req *subreq)
+ 		talloc_free(output);
+ 	}
+ 
++#if 0 && defined(FT_FUZZING) && !defined(SGFUZZ)
++	exit(0);
++#else
+ 	kill(-state->pid, SIGTERM);
++#endif
+ 	tevent_req_done(req);
+ }
+ 
+@@ -826,4 +830,3 @@ bool run_event_recv(struct tevent_req *req, int *perr,
+ 	}
+ 	return true;
+ }
+-
+diff --git a/lib/util/fault.c b/lib/util/fault.c
+index 10c3720144a..9152c10cf87 100644
+--- a/lib/util/fault.c
++++ b/lib/util/fault.c
+@@ -102,7 +102,7 @@ void fault_setup(void)
+ 	if (fault_state.disabled) {
+ 		return;
+ 	}
+-#if !defined(HAVE_DISABLE_FAULT_HANDLING)
++#if !defined(HAVE_DISABLE_FAULT_HANDLING) && !defined(FT_FUZZING)
+ #ifdef SIGSEGV
+ 	CatchSignal(SIGSEGV, sig_fault);
+ #endif
+diff --git a/source3/smbd/server.c b/source3/smbd/server.c
+index 42abfa948e6..dca9e24c90c 100644
+--- a/source3/smbd/server.c
++++ b/source3/smbd/server.c
+@@ -130,7 +130,11 @@ static void smbd_parent_conf_updated(struct messaging_context *msg,
+ 
+ static void  killkids(void)
+ {
++#if 0 && defined(FT_FUZZING) && !defined(SGFUZZ)
++	exit(0);
++#else
+ 	if(am_parent) kill(0,SIGTERM);
++#endif
+ }
+ 
+ static void msg_exit_server(struct messaging_context *msg,
+@@ -1549,7 +1553,11 @@ static NTSTATUS smbd_claim_version(struct messaging_context *msg,
+ 
+ extern void build_options(bool screen);
+ 
+- int main(int argc,const char *argv[])
++#ifdef SGFUZZ
++int HonggfuzzNetDriver_main(int argc, char ** argv)
++#else
++int main(int argc, char ** argv)
++#endif
+ {
+ 	/* shall I run as a daemon */
+ 	struct samba_cmdline_daemon_cfg *cmdline_daemon_cfg = NULL;

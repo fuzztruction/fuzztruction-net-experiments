@@ -1,0 +1,30 @@
+DESCRIBE rtsp://user:password@127.0.0.1:8554/mp3AudioTest RTSP/1.0
+CSeq: 2
+User-Agent: /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555_auth/generator/testProgs/testRTSPClient (LIVE555 Streaming Media v2023.06.14)
+Accept: application/sdp
+
+DESCRIBE rtsp://user:password@127.0.0.1:8554/mp3AudioTest RTSP/1.0
+CSeq: 3
+Authorization: Digest username="user", realm="LIVE555 Streaming Media", nonce="eb914c8a3e0aeeee400c957088d68e3f", uri="rtsp://user:password@127.0.0.1:8554/mp3AudioTest", response="ebe6af619454c0e05f32f23771a14bbe"
+User-Agent: /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555_auth/generator/testProgs/testRTSPClient (LIVE555 Streaming Media v2023.06.14)
+Accept: application/sdp
+
+SETUP rtsp://127.0.0.1:8554/mp3AudioTest/track1 RTSP/1.0
+CSeq: 4
+Authorization: Digest username="user", realm="LIVE555 Streaming Media", nonce="eb914c8a3e0aeeee400c957088d68e3f", uri="rtsp://127.0.0.1:8554/mp3AudioTest/", response="5c492492b0a656fba1664bd9cde5f4a4"
+User-Agent: /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555_auth/generator/testProgs/testRTSPClient (LIVE555 Streaming Media v2023.06.14)
+Transport: RTP/AVP;unicast;client_port=50400-50401
+
+PLAY rtsp://127.0.0.1:8554/mp3AudioTest/ RTSP/1.0
+CSeq: 5
+Authorization: Digest username="user", realm="LIVE555 Streaming Media", nonce="eb914c8a3e0aeeee400c957088d68e3f", uri="rtsp://127.0.0.1:8554/mp3AudioTest/", response="b5aab010085a6c7ae6902f5223135e0e"
+User-Agent: /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555_auth/generator/testProgs/testRTSPClient (LIVE555 Streaming Media v2023.06.14)
+Session: 000004D2
+Range: npt=0.000-
+
+TEARDOWN rtsp://127.0.0.1:8554/mp3AudioTest/ RTSP/1.0
+CSeq: 6
+Authorization: Digest username="user", realm="LIVE555 Streaming Media", nonce="eb914c8a3e0aeeee400c957088d68e3f", uri="rtsp://127.0.0.1:8554/mp3AudioTest/", response="c8d65bc017100468d571d57cd649761d"
+User-Agent: /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/live555_auth/generator/testProgs/testRTSPClient (LIVE555 Streaming Media v2023.06.14)
+Session: 000004D2
+
