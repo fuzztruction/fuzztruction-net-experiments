@@ -8,9 +8,9 @@ from src.manager import Manager
 
 def get_image_name(args: argparse.Namespace) -> str:
     if args.use_prebuilt:
-        return "fuzztruction-env-prebuilt"
+        return "fuzztruction-net-env-prebuilt"
     else:
-        return "fuzztruction-env"
+        return "fuzztruction-net-env"
 
 def setup_check_config_parser(parent_parser): # type: ignore
     check_config_parser: argparse.ArgumentParser = parent_parser.add_parser(
