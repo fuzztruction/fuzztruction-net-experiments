@@ -15,7 +15,7 @@ default-target-settings:
     # Duration of each individual run.
     # This was 24h during the papers evaluation.
     # A runtime of 12h should be sufficient to observe the same trends as in the paper.
-    run-duration: 5m
+    run-duration: 12h
     # Number of times to repeat each experiment for each target.
     # This was set to 10 for the paper's evaluation.
     # Depending on the available resources, this should be increased to get statistically more meaningful results.
