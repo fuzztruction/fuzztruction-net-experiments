@@ -186,7 +186,7 @@ function install_dependencies {
 function get_source {
     mkdir -p src
     pushd src > /dev/null
-    git clone git://git.openssl.org/openssl.git || true
+    git clone https://github.com/openssl/openssl.git || true
     cd openssl
     git checkout openssl-3.1.3
     git apply ../../fuzzing.patch
