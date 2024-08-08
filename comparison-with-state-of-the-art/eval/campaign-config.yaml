@@ -190,7 +190,7 @@ remotes:
     # Remote name.
     - "blade-33":
         # The remote address. The address given here must be a valid argument to `ssh` and the access must be possible without password authentication.
-        # So, for example, `ssh local <ssh-address> hostname` should print the remotes hostname without any further interaction.
+        # So, for example, `ssh local -o IdentityAgent=none <ssh-address> hostname` should print the remotes hostname without any further interaction.
         # This setup is also necessary if the remote and the host running the `eval.py` are the same.
         # To facilitate this, you need to deploy a public key to the remote server and add a new entry to the .ssh/config:
         # Host <ssh-address>
@@ -200,7 +200,7 @@ remotes:
         #
         # Make sure the the connection to the remote is working by running the following command which enforces to not use the ssh agent which is not
         # available when running the `eval.py` script in a tmux session.
-        #   ssh <ssh-address> hostname
+        #   ssh -o IdentityAgent=none <ssh-address> hostname
         # Also, make sure that the key is trusted, i.e., added to your known_hosts file.
         ssh-address: "blade-33"
         # The number of cores available on the remote server. We advise to set this to the number of physical cores, excluding hyper-threads.
