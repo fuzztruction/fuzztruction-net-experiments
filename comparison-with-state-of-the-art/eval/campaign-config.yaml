@@ -188,7 +188,7 @@ targets:
 # at ~/fuzztruction-net.
 remotes:
     # Remote name.
-    - "blade-33":
+    - "localhost":
         # The remote address. The address given here must be a valid argument to `ssh` and the access must be possible without password authentication.
         # Furthermore, the user must be able to execute `sudo`without being required to enter a password.`
         # So, for example, `ssh local -o IdentityAgent=none <ssh-address> sudo id -u` should print `0`` without any further interaction.
@@ -203,7 +203,7 @@ remotes:
         # available when running the `eval.py` script in a tmux session.
         #   ssh -o IdentityAgent=none <ssh-address> sudo id -u
         # Also, make sure that the key is trusted, i.e., added to your known_hosts file.
-        ssh-address: "blade-33"
+        ssh-address: "localhost"
         # The number of cores available on the remote server. We advise to set this to the number of physical cores, excluding hyper-threads.
         cores: 52
         tags: ["eval"]
