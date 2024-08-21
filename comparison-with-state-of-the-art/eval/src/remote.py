@@ -41,6 +41,7 @@ sudo chown user -R @WORK-DIR@
 rsync -a @WORK-DIR@/ /home/user/fuzztruction/eval-result/@JOB-ID@
 @LLVM-CMD@
 sudo chown user -R /home/user/fuzztruction/eval-result/@JOB-ID@
+sudo chmod -R 777 /home/user/fuzztruction/eval-result
 """
 
 
