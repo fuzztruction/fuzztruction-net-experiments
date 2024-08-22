@@ -203,8 +203,10 @@ class Executor:
         return Executor._get_label_value(container, Executor.JOB_NAME_LABEL)
 
     def cpuset(self) -> typing.Set[int]:
-        assert self._container
         result = set()
+        # If the container terminated, it does not allocate any CPUs anymore.
+        if self._container is None:
+            return result
         cpuset_str: str = self._container.attrs["HostConfig"]["CpusetCpus"]
 
         for range_or_cpu in cpuset_str.split(","):
