@@ -2,6 +2,8 @@
 
 This repository contains all scripts and configurations needed to re-run the experiments conducted in our paper. This repository is embedded as a submodule in the context of [Fuzztruction-Net's main repository](https://github.com/fuzztruction/fuzztruction-net). Please read the whole documentation before conducting any experiment.
 
+If the prebuilt environment is used, you may skip to the [Comparison with State of the Art](#Comparison-with-State-of-the-Art) section below.
+
 ## Repository Layout
 The folder `comparison-with-state-of-the-art` contains all data needed to rerun the evaluation.
 
@@ -38,31 +40,53 @@ This folder contains the configurations for all fuzzing targets evaluated in the
 Please look at `configurations/networked/dropbear/dbclient_dropbear.yml` for an extensively documented configuration file.
 
 ## Comparison with State of the Art
+<a name="Comparison-with-State-of-the-Art"></a>
 To reproduce the results presented in the paper, we describe how to setup and conduct the experiments to compare Fuzztruction-Net to state-of-the-art fuzzers.
 
 
 ### Target Preparation
-Before the evaluation can be done, the target applications must be built. This can happen via the `build.sh` scripts introduced above, or by using the pre-built runtime environment as described in the [main repository](https://github.com/fuzztruction/fuzztruction-net).
+Before the evaluation can be done, the target applications must be built. This can happen via the `build.sh` scripts introduced above, or by using the pre-built runtime environment as described in the [main repository](https://github.com/fuzztruction/fuzztruction-net). If the pre-built image should be used, it is sufficient to execute the following command:
+```sh
+# Pull the pre-built Docker image (this will require ~80 GiB of disk space)
+# See the main repository for more details.
+./env/pull-prebuilt.sh
+```
 
 > [!NOTE]
 > Building all targets (e.g., via `build-all.sh all`) consumes a considerable amount of time. Thus, we strongly advise you to use our pre-built image.
 
 ### Resource Requirements
+<a name="Target-Preparation"></a>
 The evaluation in the paper was conducted on a system powered by two Intel(R) Xeon(R) Gold 5320 CPU @ 2.20GHz 26 cores each, equipped with 256GB of RAM.
 
 Each of the targets was evaluated for 24 hours, 10 times each. This was done for each fuzzer configuration (FT-Net, AFLNet, SGFuzz, StateAFL). For each fuzzer configuration, 13 cores were assigned, such that we could run 4 experiments in parallel.
 
-### Running the Experiments
-> <b><span style="color:red">Note:</span></b> During evaluation, an instance of the Docker runtime environment is used for each specific target. This runtime environment must contain a compiled version of all targets that are referenced by the eval campaign configuration introduced below. Furthermore, please note that the `eval.py` script is intended to be used on the *host* and not inside a Docker container, such as Fuzztruction-Net's runtime environment.
+During evaluation, a considerable amount of data in genereted. Thus, make sure that your home directory hast at least 100 GiB of free disk space.
 
-The `eval` folder contains everything needed to run an automatically scheduled evaluation. The fuzzing campaign, including targets and fuzzers to consider, can be configured via the `campaign-config.yaml` file. Please have a look at the comments in `campaign-config.yaml` for details regarding the configuration. The config shipped as part of this repo does *not* use the exact settings of our paper evaluation, since the amount of computational ressource required is likely infeasible for most people reproducing our evaluation. Please check the config and verify it suits your goals and available computation resources. Also, we disable StateAFL by default, as it is quite buggy and requires frequent manual intervention. Our evaluation has shown that it does not contribute significantly better results, making it not worth the hassle. The only exception is mosquitto, but SGFuzz is even better.
+### Running the Experiments
+> [!NOTE]
+> During evaluation, an instance of the Docker runtime environment is used for each specific target. This runtime environment must contain a compiled version of all targets that are referenced by the eval campaign configuration introduced below. Furthermore, please note that the `eval.py` script is intended to be used on the *host* and not inside a Docker container, such as Fuzztruction-Net's runtime environment.
+
+The `eval` folder contains everything needed to run an automatically scheduled evaluation. The fuzzing campaign, including targets and fuzzers to consider, can be configured via the `campaign-config.yaml` file. Please have a look at the comments in `campaign-config.yaml` for details regarding the configuration. In particular, you are required to adapt the `remotes` section at the end of the file before starting the evaluation. Please note that all remotes must have `fuzztruction-net` checked out at the users home directory root (e.g., $HOME/fuzztuction-net) and the fuzztruction-net runtime must be available too (see (Target Preparation)[Target-Preparation]).
+The config shipped as part of this repo does *not* use the exact settings of our paper evaluation, since the amount of computational ressource required is likely infeasible for most people reproducing our evaluation. Please check the config and verify it suits your goals and available computation resources. Also, we disable StateAFL by default, as it is quite buggy and requires frequent manual intervention. Our evaluation has shown that it does not contribute significantly better results, making it not worth the hassle. The only exception is mosquitto, but SGFuzz is even better.
 
 After configuration, the host's Python environment for the evaluation script needs to be prepared by executing `prepare_env.sh`. After running the script, you should be instructed to enable the virtual environment by executing `source venv/bin/activate`.
 
-Next, the evaluation can be started by executing `python3 eval.py campaign-config.yaml --use-prebuilt schedule` (the `--use-prebuilt` must be stripped if a locally build runtime should be used). During execution, logs are saved in a directory called `artifact-results/logs`. After a run terminated, the resulting artifacts are stored in `artifact-results/finished`. In case of encountering problems, please provide the logs alongside your report. Before conducting long runs, you should consider setting the `timeout` in the config to a relatively low value to test that everything is working smoothly.
-> <b><span style="color:red">Note:</span></b> The script must be kept running for it to be able to schedule new fuzzing runs after previous runs terminated. Thus, it is recommended to run the script inside a `tmux` session. Alternatively, the script can be periodically manually executed after some runs have finished.
+Next, the evaluation can be started by executing
+```sh
+# Start to schedule the evaluation jobs. Mind to adapt the `remotes` configuration in the
+# `campaign-config.yaml` before starting the evaluation.
+# - the script will terminate on its own after all evaluation jobs have terminated
+# - the `--use-prebuilt` must be stripped if a locally build runtime should be used)
+python3 eval.py campaign-config.yaml --use-prebuilt schedule
+```
+During execution, logs are saved in a directory called `artifact-results/logs`. After a run terminated, the resulting artifacts are stored in `artifact-results/finished`. In case of encountering problems, please provide the logs alongside your report. Before conducting long runs, you should consider setting the `timeout` in the config to a relatively low value to test that everything is working smoothly.
 
-> <b><span style="color:red">Note:</span></b> Setting a timeout of, e.g, 24h, does not mean that all activity stops after exactly 24 hours, since coverage is computed afterwards automatically (this may take a couple of hours in some cases). Please keep this in mind when running the evaluation.
+> [!NOTE]
+> The script must be kept running for it to be able to schedule new fuzzing runs after previous runs terminated. Thus, it is recommended to run the script inside a `tmux` session. Alternatively, the script can be periodically manually executed after some runs have finished.
+
+> [!NOTE]
+> Setting a timeout of, e.g, 24h, does not mean that all activity stops after exactly 24 hours, since coverage is computed afterwards automatically (this may take a couple of hours in some cases). Please keep this in mind when running the evaluation.
 
 
 ### Plotting
