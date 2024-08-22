@@ -264,10 +264,10 @@ class Executor:
             docker.types.Ulimit(name="msgqueue", hard=2097152000, soft=2097152000) # type: ignore
         ]
 
-        volumes = {}
+        volumes: typing.Dict[str, typing.Dict[str,str]] = {}
         if self._image_name == "fuzztruction-env":
-            username = self._remote.execute_on_remote(["id -nu"]).stdout.strip()
-            fuzztruction_dir = Path("/home") / username / "fuzztruction-net"
+            home_dir_path = self._remote.execute_on_remote(["echo $HOME"]).stdout.strip()
+            fuzztruction_dir = Path(home_dir_path) / "fuzztruction-net"
 
             volumes = {
                 f"{fuzztruction_dir.as_posix()}": {
@@ -278,8 +278,8 @@ class Executor:
         else:
             # If this is a prebuilt image, all files should be part of the image itself, but we still need a way to
             # get the results out of the container.
-            username = self._remote.execute_on_remote(["id -nu"]).stdout.strip()
-            fuzztruction_dir = Path("/home") / username / "fuzztruction-net" / "eval-result"
+            home_dir_path = self._remote.execute_on_remote(["echo $HOME"]).stdout.strip()
+            fuzztruction_dir = Path(home_dir_path) / "fuzztruction-net" / "eval-result"
             volumes = {
                 f"{fuzztruction_dir.as_posix()}": {
                     "bind": "/home/user/fuzztruction/eval-result",
@@ -300,7 +300,7 @@ class Executor:
             "bash -c 'set -eu; echo -e \"$RUN_SCRIPT\" | bash'",
             name=self.job().id(),
             detach=True,
-            volumes=volumes,
+            volumes=volumes, # type: ignore
             labels=labels,
             tmpfs=tmpfs,
             privileged=True,
@@ -367,7 +367,7 @@ class Executor:
 
             container_alive = status in ["created", "running"]
             if not container_alive:
-                log.info("Wating for container exists status...")
+                log.info("Wating for container exit status...")
                 failed = self._container.wait()["StatusCode"] != 0
                 if failed:
                     log.error("Container exits with an non zero exit code.")
