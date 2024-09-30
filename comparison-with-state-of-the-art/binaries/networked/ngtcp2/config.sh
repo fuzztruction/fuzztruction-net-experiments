@@ -119,22 +119,20 @@ function build_consumer_llvm_cov {
     export CMAKE_LIBRARY_PATH="$CMAKE_LIBRARY_PATH:$PWD/nghttp3/lib/.libs:$PWD/build/lib"
     export CMAKE_INCLUDE_PATH="$CMAKE_INCLUDE_PATH:$PWD/nghttp3/lib/includes"
 
-    export CFLAGS="-g -O0 -DFT_FUZZING -DFT_CONSUMER -fsanitize=address -fprofile-instr-generate -fcoverage-mapping -v -L../libs"
-    export CXXFLAGS="-g -O0  -DFT_FUZZING -DFT_CONSUMER -fsanitize=address -fprofile-instr-generate -fcoverage-mapping -v -L../libs"
-    export LDFLAGS="-fprofile-instr-generate -fcoverage-mapping"
-
     echo $CMAKE_LIBRARY_PATH
 
     mkdir build && cd build
+    export CFLAGS="-g -O0 -DFT_FUZZING -DFT_CONSUMER -fsanitize=address -fprofile-instr-generate -fcoverage-mapping -v -L$PWD/lib"
+    export CXXFLAGS="-g -O0  -DFT_FUZZING -DFT_CONSUMER -fsanitize=address -fprofile-instr-generate -fcoverage-mapping -v -L$PWD/lib"
+    export LDFLAGS="-fprofile-instr-generate -fcoverage-mapping"
+
     cmake .. -DENABLE_WOLFSSL=ON -DENABLE_SHARED_LIB=OFF
     set +e
     make -j
     set -e
 
     cd examples
-    "/usr/bin/ld" -pie -z relro --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o wsslserver -L../lib /lib/x86_64-linux-gnu/Scrt1.o /lib/x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L$PWD/../lib  -L/home/user/fuzztruction/target/debug -L/usr/lib/clang/17/lib/x86_64-unknown-linux-gnu -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/lib -L/usr/lib -lnetwork_fuzzing_introspection CMakeFiles/wsslserver.dir/server.cc.o CMakeFiles/wsslserver.dir/server_base.cc.o CMakeFiles/wsslserver.dir/debug.cc.o CMakeFiles/wsslserver.dir/util.cc.o CMakeFiles/wsslserver.dir/http.cc.o CMakeFiles/wsslserver.dir/shared.cc.o CMakeFiles/wsslserver.dir/tls_server_context_wolfssl.cc.o CMakeFiles/wsslserver.dir/tls_server_session_wolfssl.cc.o CMakeFiles/wsslserver.dir/tls_session_base_wolfssl.cc.o CMakeFiles/wsslserver.dir/util_wolfssl.cc.o ../third-party/CMakeFiles/http-parser.dir/http-parser/http_parser.c.o -rpath /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/ngtcp2/consumer_llvm_cov/wolfssl/src/.libs:/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/ngtcp2/consumer_llvm_cov/nghttp3/lib/.libs ../crypto/wolfssl/libngtcp2_crypto_wolfssl.a -lngtcp2 /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/ngtcp2/consumer_llvm_cov/wolfssl/src/.libs/libwolfssl.so /usr/lib/x86_64-linux-gnu/libev.so /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/ngtcp2/consumer_llvm_cov/nghttp3/lib/.libs/libnghttp3.so /usr/local/bin/../lib/afl/afl-compiler-rt.o --dynamic-list=/usr/local/bin/../lib/afl/dynamic_list.txt -u__llvm_profile_runtime /usr/lib/clang/17/lib/x86_64-unknown-linux-gnu/libclang_rt.profile.a -fsanitize=address -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc  /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtendS.o /lib/x86_64-linux-gnu/crtn.o 
-    "/usr/bin/ld" -pie -z relro --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o wsslclient -L../lib /lib/x86_64-linux-gnu/Scrt1.o /lib/x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtbeginS.o -L$PWD/../lib -L/home/user/fuzztruction/target/debug -L/usr/lib/clang/17/lib/x86_64-unknown-linux-gnu -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/12/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/lib -L/usr/lib -lnetwork_fuzzing_introspection CMakeFiles/wsslclient.dir/client.cc.o CMakeFiles/wsslclient.dir/client_base.cc.o CMakeFiles/wsslclient.dir/debug.cc.o CMakeFiles/wsslclient.dir/util.cc.o CMakeFiles/wsslclient.dir/shared.cc.o CMakeFiles/wsslclient.dir/tls_client_context_wolfssl.cc.o CMakeFiles/wsslclient.dir/tls_client_session_wolfssl.cc.o CMakeFiles/wsslclient.dir/tls_session_base_wolfssl.cc.o CMakeFiles/wsslclient.dir/util_wolfssl.cc.o ../third-party/CMakeFiles/http-parser.dir/http-parser/http_parser.c.o -rpath /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/ngtcp2/consumer_llvm_cov/wolfssl/src/.libs:/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/ngtcp2/consumer_llvm_cov/nghttp3/lib/.libs ../crypto/wolfssl/libngtcp2_crypto_wolfssl.a -lngtcp2 /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/ngtcp2/consumer_llvm_cov/wolfssl/src/.libs/libwolfssl.so /usr/lib/x86_64-linux-gnu/libev.so /home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/ngtcp2/consumer_llvm_cov/nghttp3/lib/.libs/libnghttp3.so /usr/local/bin/../lib/afl/afl-compiler-rt.o --dynamic-list=/usr/local/bin/../lib/afl/dynamic_list.txt -u__llvm_profile_runtime /usr/lib/clang/17/lib/x86_64-unknown-linux-gnu/libclang_rt.profile.a -fsanitize=address -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/bin/../lib/gcc/x86_64-linux-gnu/12/crtendS.o /lib/x86_64-linux-gnu/crtn.o 
-    echo "done"
+    make
 }
 
 function build_consumer_afl_net {
@@ -250,6 +248,7 @@ function get_source {
 
     git clone https://github.com/ngtcp2/nghttp3
     cd nghttp3
+    git checkout 7ca2b33423f4e706d540df780c7a1557affdc42c
     git submodule update --init
 
     cd ..
