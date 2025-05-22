@@ -1,0 +1,42 @@
+# Directory in that all files that belong to the fuzzing campaign are stored.
+work-directory: "/tmp/dtlsclient-dtlsserver-1"
+# Not used for Fuzztruction-Net.
+input-directory: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/no-inputs"
+# UID/GID the weird peer's privileges are dropped to.
+jail-uid: 606400022
+jail-gid: 606400022
+
+# The program that is acting as the weird peer.
+source:
+    # The binary that has to be instrumented with our custom compiler.
+    # See comparison-with-state-of-the-art/binaries/networked/dropbear/config.sh for how the binary has been build.
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/tinydtls/generator/tests/dtls-client"
+    arguments: ["-i", "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/tinydtls/psk-identity.txt", "-k", "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/configurations/networked/tinydtls/psk-key.txt", "127.0.0.1", "20220"]
+    input-type: udp
+    output-type: udp
+    is-server: false
+    log-stdout: false
+    log-stderr: false
+
+# The program that is actually fuzzed.
+sink:
+    # The target binary that has to be compiled with our custom AFL++ version.
+    # See comparison-with-state-of-the-art/binaries/networked/dropbear/config.sh for how the binary has been build.
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/tinydtls/consumer/tests/dtls-server"
+    arguments: []
+    input-type: udp
+    output-type: udp
+    is-server: true
+    server-port: "20220"
+    log-stdout: false
+    log-stderr: false
+    allow-unstable-sink: true
+
+# Binary used for coverage computation.
+sink-cov:
+    # See comparison-with-state-of-the-art/binaries/networked/dropbear/config.sh for how the binary has been build.
+    bin-path: "/home/user/fuzztruction/fuzztruction-experiments/comparison-with-state-of-the-art/binaries/networked/tinydtls/consumer_llvm_cov/tests/dtls-server"
+
+# Unused.
+vanilla:
+    bin-path: "/usr/bin/true"
